@@ -8,9 +8,12 @@ from src.message_factories.rocket_message_factory import RocketMessageFactory
 from src.urls.chat_api_urls import chat_api_url_factory
 from src.urls.rocket_chat_urls import *
 from src.visitor_management.visitor_map import *
+from pydub import AudioSegment
 
-app = Flask(__name__)
-
+app = Flask(__name__,
+        static_url_path='/static',
+        static_folder='static',
+        )
 
 @app.route('/msg_snd', methods=["GET", "POST"])
 def msg_snd():
@@ -24,6 +27,7 @@ def msg_snd():
 
         # extract the payload received via post
         received_message = request.json
+
 
         # get hold of the messages array inside the payload sent by
         # rocket chat. Tipically this array contains only one message.
@@ -45,10 +49,15 @@ def msg_snd():
             # Build the url based on the message object
             url = chat_api_url_factory(message)
 
+            print("\n\n\n\n the payload \n\n")
+            print("the url {}".format(url))
             print(json.dumps(message_dict))
+            print("\n\n\n\n the payload \n\n")
+
             # send the message to Chat-Api
             answer = requests.post(url, data=json.dumps(
                 message_dict), headers=headers)
+
             print(answer.text)
     return answer.text
 

@@ -10,6 +10,7 @@ class RocketMessageFactory:
         }
 
     def __build_media_message(self):
+        #TODO: uncomment this line
         get_file_endpoint = CHAT_API_URL + CHAT_GET_FILE.format(self.message["id"], CHAT_API_TOKEN)
         file = requests.get(get_file_endpoint)
         media_url = json.loads(file.text)["url"]

@@ -1,5 +1,7 @@
-from src.constants import domain_name
+from src.constants import *
 import json
+import tempfile
+from src.file_handlers.file_converter import *
 
 class ChatApiTextMessage:
     def __init__(self, message_content, destination):
@@ -10,14 +12,21 @@ class ChatApiTextMessage:
         return {"phone": self.destination, "body": self.message_content}
 
 class ChatApiMediaMessage:
-    def __init__(self, public_path, description, destination, file_name):
+    def __init__(self, public_path, description, destination, file_name, file_type):
         self.public_path = public_path
         self.description = description
         self.destination = destination
+        self.file_type = file_type
         self.file_name = file_name
 
     def build(self):
-        return {"phone": self.destination, "body": self.public_path, "caption": self.description, "filename": self.file_name}
+        if(self.file_type == "audio/mp3"):
+            filename = convert_mp3_ogg(self.public_path)
+            static_path = STATIC_FILES_PATH + filename;
+            return {"phone": self.destination, "body": public_path, "caption": "", "filename": self.file_name}
+            
+        else:
+            return {"phone": self.destination, "body": self.public_path, "caption": self.description, "filename": self.file_name}
 
 
 # Factory class that build messages ready to be sent to 
@@ -32,7 +41,8 @@ class ChatApiMessageFactory:
         message_dict = {}
         if "fileUpload" in incoming_message:
             # Get the public path url from the file sent from rocket chat
-            public_path = incoming_message["fileUpload"]["publicFilePath"].replace("localhost:3000", domain_name)
+            #public_path = incoming_message["fileUpload"]["publicFilePath"].replace("localhost:3000", domain_name)
+            public_path = incoming_message["fileUpload"]["publicFilePath"]
 
             # the body of the message is the public path
             if "description" in incoming_message["attachments"][0]:
@@ -41,9 +51,10 @@ class ChatApiMessageFactory:
                 description = ""
 
             file_name = incoming_message["file"]["name"]
+            file_type = incoming_message["fileUpload"]["type"]
 
             # Create a MediaMessage object and return it
-            message = ChatApiMediaMessage(public_path, description, destination, file_name)
+            message = ChatApiMediaMessage(public_path, description, destination, file_name, file_type)
             message_dict = message.build()
         else:
             message_content = "*[{}]*\n{}".format(incoming_message["username"], incoming_message["msg"])
