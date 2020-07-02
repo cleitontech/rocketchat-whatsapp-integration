@@ -2,7 +2,7 @@ from src.constants import CHAT_API_URL, CHAT_API_TOKEN
 def chat_api_url_factory(message):
     method = ""
     if "fileUpload" in message:
-        if message["fileUpload"]["type"] == "audio/ogg":
+        if message["fileUpload"]["type"] == "audio/mp3":
             method = "sendPTT"
         else:
             method = "sendFile"

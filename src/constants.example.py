@@ -15,3 +15,6 @@ ROCKET_URL_PREFIX                   = 'http://your-rocket-chat-domain'
 ROCKET_MESSAGE_URL_POSTFIX          = '/api/v1/livechat/message'
 ROCKET_GET_ROOM_POSTFIX             = '/api/v1/livechat/room'
 ROCKET_VISITOR_POSTFIX              = "/api/v1/livechat/visitor"
+
+
+STATIC_FILES_PATH                   = "http://localhost:5000/static/"

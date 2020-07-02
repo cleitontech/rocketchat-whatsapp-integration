@@ -23,7 +23,7 @@ class ChatApiMediaMessage:
         if(self.file_type == "audio/mp3"):
             filename = convert_mp3_ogg(self.public_path)
             static_path = STATIC_FILES_PATH + filename;
-            return {"phone": self.destination, "body": public_path, "caption": "", "filename": self.file_name}
+            return {"phone": self.destination, "audio": static_path}
             
         else:
             return {"phone": self.destination, "body": self.public_path, "caption": self.description, "filename": self.file_name}
