@@ -47,7 +47,7 @@ def msg_snd():
             url = chat_api_url_factory(message)
 
             # Create the header to send along with our request
-            if url.includes("sendPtt"):
+            if "sendPtt" in url:
                 headers = {'accept': 'application/json', "Content-type": "application/x-www-form-urlencoded"}
             else:
                 headers = {"Content-type": "application/json"}
