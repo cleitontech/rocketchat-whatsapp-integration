@@ -6,7 +6,7 @@ import requests
 
 def convert_mp3_ogg(filepath):
     #TODO: delete temporary files
-    request = request.get(filepath, allow_redirects = True)
+    request = requests.get(filepath, allow_redirects = True)
     file_bytes = request.content
 
     temp_file_name = "temp/"+str(uuid.uui4()) + ".mp3"
