@@ -18,3 +18,6 @@ ROCKET_VISITOR_POSTFIX              = "/api/v1/livechat/visitor"
 
 
 STATIC_FILES_PATH                   = "http://localhost:5000/static/"
+
+CHAT_API_QUEUE_FOLDER               = "messages_queue/chat_api/"
+ROCKET_QUEUE_FOLDER                 = "messages_queue/rocket_chat/"

@@ -8,7 +8,9 @@ from src.message_factories.rocket_message_factory import RocketMessageFactory
 from src.urls.chat_api_urls import chat_api_url_factory
 from src.urls.rocket_chat_urls import *
 from src.visitor_management.visitor_map import *
+from src.constants import *
 from pydub import AudioSegment
+from src.messages_queue import *
 
 app = Flask(__name__,
         static_url_path='/static',
@@ -22,10 +24,10 @@ def msg_snd():
         # possible messages incoming form RocketChat
         messageFactory = ChatApiMessageFactory()
 
-
         # extract the payload received via post
         received_message = request.json
 
+        RocketChatMessageQueue.store(message)
 
         # get hold of the messages array inside the payload sent by
         # rocket chat. Tipically this array contains only one message.
@@ -55,6 +57,8 @@ def msg_snd():
 
             # send the message to Chat-Api
             answer = requests.post(url, data=json.dumps(message_dict), headers=headers)
+            if answer.status_code == 200:
+                RocketChatMessageQueue.delete(message)
     return answer.text
 
 
@@ -81,6 +85,8 @@ def msg_recv():
             # sending duplicate messages to rocket chat.
             if "ack" in message and message["ack"] != 0:
                 return "ACK MESSAGE"
+
+            ChatApiMessageQueue.store(message)
 
             # register visitor in rocket chat
             visitor_dict = create_visitor(message)
@@ -112,12 +118,14 @@ def msg_recv():
             response = requests.post(url=get_rocket_message_url(
             ), data=json.dumps(converted_message), headers=headers)
 
+            if response.status_code == 200:
+                ChatApiMessageQueue.delete(message)
 
     return(response.text)
 
 
 if __name__ == "__main__":
-    file_folders = ["static", "temp"]
+    file_folders = ["static", "temp", CHAT_API_QUEUE_FOLDER, ROCKET_QUEUE_FOLDER]
     for folder_name in file_folders:
         if not os.path.isdir(os.path.join(os.getcwd(), folder_name)):
             os.makedirs(os.path.join(os.getcwd(), folder_name))
