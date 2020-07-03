@@ -55,7 +55,6 @@ def msg_snd():
 
             # send the message to Chat-Api
             answer = requests.post(url, data=json.dumps(message_dict), headers=headers)
-            print(answer.text)
     return answer.text
 
 
@@ -118,5 +117,10 @@ def msg_recv():
 
 
 if __name__ == "__main__":
+    file_folders = ["static", "temp"]
+    for folder_name in file_folders:
+        if not os.path.isdir(os.path.join(os.getcwd(), folder_name)):
+            os.makedirs(os.path.join(os.getcwd(), folder_name))
+
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
