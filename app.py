@@ -25,10 +25,16 @@ def msg_snd():
         messageFactory = ChatApiMessageFactory()
 
         # extract the payload received via post
-        received_message = request.json
-
-        file_uuid = str(uuid.uuid4())
-        RocketChatMessageQueue.store(received_message, file_uuid)
+        if request.GET.get("message_uuid"):
+            message_uuid = request.GET.get("message_uuid")
+            print("kevin, quem escuta vive mais")
+            received_message = json.loads()
+        else:
+            received_message = request.json
+            message_uuid = str(uuid.uuid4())
+            RocketChatMessageQueue.store(received_message, message_uuid)
+        if not received_message:
+            return "NO MESSAGE"
 
         # get hold of the messages array inside the payload sent by
         # rocket chat. Tipically this array contains only one message.
@@ -59,7 +65,7 @@ def msg_snd():
             # send the message to Chat-Api
             answer = requests.post(url, data=json.dumps(message_dict), headers=headers)
             if answer.status_code == 200:
-                RocketChatMessageQueue.delete(file_uuid)
+                RocketChatMessageQueue.delete(message_uuid)
     return answer.text
 
 

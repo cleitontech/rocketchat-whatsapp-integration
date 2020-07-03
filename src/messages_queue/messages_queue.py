@@ -26,16 +26,16 @@ class ChatApiMessageQueue:
 
 class RocketChatMessageQueue:
     @staticmethod
-    def store(message, uuid):
-        message_content = json.dumps(message)
-        file_path = ROCKET_QUEUE_FOLDER + uuid
+    def store(received_message, message_uuid):
+        message_content = json.dumps(received_message)
+        file_path = ROCKET_QUEUE_FOLDER + message_uuid
         message_file = open(file_path, "w")
         message_file.write(message_content)
         message_file.close()
 
     @staticmethod
-    def delete(uuid):
-        file_path = ROCKET_QUEUE_FOLDER + uuid
+    def delete(message_uuid):
+        file_path = ROCKET_QUEUE_FOLDER + message_uuid
         if(os.path.isfile(file_path)):
             try:
                 os.remove(file_path)
