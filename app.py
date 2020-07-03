@@ -8,9 +8,12 @@ from src.message_factories.rocket_message_factory import RocketMessageFactory
 from src.urls.chat_api_urls import chat_api_url_factory
 from src.urls.rocket_chat_urls import *
 from src.visitor_management.visitor_map import *
+from pydub import AudioSegment
 
-app = Flask(__name__)
-
+app = Flask(__name__,
+        static_url_path='/static',
+        static_folder='static',
+        )
 
 @app.route('/msg_snd', methods=["GET", "POST"])
 def msg_snd():
@@ -19,11 +22,10 @@ def msg_snd():
         # possible messages incoming form RocketChat
         messageFactory = ChatApiMessageFactory()
 
-        # Create the header to send along with our request
-        headers = {"Content-type": "application/json"}
 
         # extract the payload received via post
         received_message = request.json
+
 
         # get hold of the messages array inside the payload sent by
         # rocket chat. Tipically this array contains only one message.
@@ -32,8 +34,7 @@ def msg_snd():
 
         # Extract the message destination from the object. It is in the
         # format 5551998121654-c.us
-        message_destination = received_message["visitor"]["token"].split(
-            "-")[0]
+        message_destination = received_message["visitor"]["token"].split("-")[0]
 
         # iterate through the messages array. Again, tipically this array
         # only contains one message... so a single iteration...
@@ -45,11 +46,15 @@ def msg_snd():
             # Build the url based on the message object
             url = chat_api_url_factory(message)
 
-            print(json.dumps(message_dict))
+            # Create the header to send along with our request
+            if "sendPtt" in url:
+                headers = {'accept': 'application/json', "Content-type": "application/x-www-form-urlencoded"}
+            else:
+                headers = {"Content-type": "application/json"}
+
+
             # send the message to Chat-Api
-            answer = requests.post(url, data=json.dumps(
-                message_dict), headers=headers)
-            print(answer.text)
+            answer = requests.post(url, data=json.dumps(message_dict), headers=headers)
     return answer.text
 
 
@@ -74,7 +79,7 @@ def msg_recv():
             # Ack zero means that the message was sent.
             # So we ignore anything that is not zero to avoid
             # sending duplicate messages to rocket chat.
-            if "ack" in message and message["ack"] != 0 and message["ack"] != 1:
+            if "ack" in message and message["ack"] != 0:
                 return "ACK MESSAGE"
 
             # register visitor in rocket chat
@@ -112,5 +117,10 @@ def msg_recv():
 
 
 if __name__ == "__main__":
+    file_folders = ["static", "temp"]
+    for folder_name in file_folders:
+        if not os.path.isdir(os.path.join(os.getcwd(), folder_name)):
+            os.makedirs(os.path.join(os.getcwd(), folder_name))
+
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
