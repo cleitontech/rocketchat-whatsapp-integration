@@ -21,9 +21,9 @@ class ChatApiMediaMessage:
 
     def build(self):
         if(self.file_type == "audio/mp3"):
-            filename = convert_mp3_ogg(self.public_path)
-            static_path = STATIC_FILES_PATH + filename;
-            return {"phone": self.destination, "audio": static_path}
+            encoded_file = convert_mp3_ogg(self.public_path)
+            audio = "data:audio/ogg;base64," + encoded_file
+            return {"phone": self.destination, "audio": audio}
             
         else:
             return {"phone": self.destination, "body": self.public_path, "caption": self.description, "filename": self.file_name}

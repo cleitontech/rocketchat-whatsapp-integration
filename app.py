@@ -22,8 +22,6 @@ def msg_snd():
         # possible messages incoming form RocketChat
         messageFactory = ChatApiMessageFactory()
 
-        # Create the header to send along with our request
-        headers = {"Content-type": "application/json"}
 
         # extract the payload received via post
         received_message = request.json
@@ -36,8 +34,7 @@ def msg_snd():
 
         # Extract the message destination from the object. It is in the
         # format 5551998121654-c.us
-        message_destination = received_message["visitor"]["token"].split(
-            "-")[0]
+        message_destination = received_message["visitor"]["token"].split("-")[0]
 
         # iterate through the messages array. Again, tipically this array
         # only contains one message... so a single iteration...
@@ -49,15 +46,15 @@ def msg_snd():
             # Build the url based on the message object
             url = chat_api_url_factory(message)
 
-            print("\n\n\n\n the payload \n\n")
-            print("the url {}".format(url))
-            print(json.dumps(message_dict))
-            print("\n\n\n\n the payload \n\n")
+            # Create the header to send along with our request
+            if url.includes("sendPtt"):
+                headers = {'accept': 'application/json', "Content-type": "application/x-www-form-urlencoded"}
+            else:
+                headers = {"Content-type": "application/json"}
+
 
             # send the message to Chat-Api
-            answer = requests.post(url, data=json.dumps(
-                message_dict), headers=headers)
-
+            answer = requests.post(url, data=message_dict, headers=headers)
             print(answer.text)
     return answer.text
 
