@@ -9,7 +9,7 @@ def convert_mp3_ogg(filepath):
     request = requests.get(filepath, allow_redirects = True)
     file_bytes = request.content
 
-    temp_file_name = "temp/"+str(uuid.uui4()) + ".mp3"
+    temp_file_name = "temp/"+str(uuid.uuid4()) + ".mp3"
     temp_file = open(temp_file_name, "wb")
     temp_file.write(file_bytes)
     temp_file.close()
