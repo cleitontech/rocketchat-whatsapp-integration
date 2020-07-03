@@ -27,7 +27,8 @@ def msg_snd():
         # extract the payload received via post
         received_message = request.json
 
-        RocketChatMessageQueue.store(received_message)
+        file_uuid = str(uuid.uuid4())
+        RocketChatMessageQueue.store(received_message, file_uuid)
 
         # get hold of the messages array inside the payload sent by
         # rocket chat. Tipically this array contains only one message.
@@ -58,7 +59,7 @@ def msg_snd():
             # send the message to Chat-Api
             answer = requests.post(url, data=json.dumps(message_dict), headers=headers)
             if answer.status_code == 200:
-                RocketChatMessageQueue.delete(message)
+                RocketChatMessageQueue.delete(file_uuid)
     return answer.text
 
 

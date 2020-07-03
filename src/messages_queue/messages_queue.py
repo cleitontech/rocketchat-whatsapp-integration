@@ -26,18 +26,16 @@ class ChatApiMessageQueue:
 
 class RocketChatMessageQueue:
     @staticmethod
-    def store(message):
-        message_id = message["_id"].replace("@", "-").replace(".", "-")
+    def store(message, uuid):
         message_content = json.dumps(message)
-        file_path = ROCKET_QUEUE_FOLDER + message_id
+        file_path = ROCKET_QUEUE_FOLDER + uuid
         message_file = open(file_path, "w")
         message_file.write(message_content)
         message_file.close()
 
     @staticmethod
-    def delete(message):
-        message_id = message["_id"].replace("@", "-").replace(".", "-")
-        file_path = ROCKET_QUEUE_FOLDER + message_id
+    def delete(uuid):
+        file_path = ROCKET_QUEUE_FOLDER + uuid
         if(os.path.isfile(file_path)):
             try:
                 os.remove(file_path)
