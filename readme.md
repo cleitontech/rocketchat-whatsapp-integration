@@ -35,9 +35,14 @@ Your webhook url should look like ```https://your-domain-name.com/msg_snd```.
 ## TODO:
 - [x] Send text messages from WhatApp to Rocket.Chat
 - [x] Send text messages from Rocket.chat to WhatsApp
-- [x] Send media messages from Rocket.chat to WhatApp (currently only images)
-- [x] Send media messages from WhatsApp to Rocket.Chat (media currently goes as links)
+- [x] Send media messages from Rocket.chat to WhatApp
+  - [x] images
+  - [x] audio
+  - [x] documents
+- [ ] Send media messages from WhatsApp to Rocket.Chat
+  - [x] Send media as links
+  - [ ] Send images as attachments
 - [ ] Integrate with other APIs. (e.g., [Wassenger](https://www.wassenger.com/))
 
 ## Want to contribute?
-Feel free to open a pull request with a bug fix or a feature you think is interesting.
+Feel free to open a pull request with a bug fix or a feature you think is interesting. 
