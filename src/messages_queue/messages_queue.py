@@ -1,17 +1,18 @@
 import os
-from constants import CHAT_API_QUEUE_FOLDER, ROCKET_QUEUE_FOLDER
+import json
+from src.constants import CHAT_API_QUEUE_FOLDER, ROCKET_QUEUE_FOLDER
 class ChatApiMessageQueue:
-    @static
+    @staticmethod
     def store(message):
+        message_id = message["id"].replace("@", "-").replace(".", "-")
         message = [message]
         message_content = json.dumps(message)
-        message_id = message["id"].replace("@", "-").replace(".", "-")
         file_path = CHAT_API_QUEUE_FOLDER + message_id
-        message_file = open(message_id, "w")
+        message_file = open(file_path, "w")
         message_file.write(message_content)
         message_file.close()
 
-    @static
+    @staticmethod
     def delete(message):
         message_id = message["id"]
         file_path = CHAT_API_QUEUE_FOLDER + message_id
@@ -24,16 +25,16 @@ class ChatApiMessageQueue:
             
 
 class RocketChatMessageQueue:
-    @static
+    @staticmethod
     def store(message):
-        message_content = json.dumps(message)
         message_id = message["_id"].replace("@", "-").replace(".", "-")
+        message_content = json.dumps(message)
         file_path = ROCKET_QUEUE_FOLDER + message_id
         message_file = open(file_path, "w")
         message_file.write(message_content)
         message_file.close()
 
-    @static
+    @staticmethod
     def delete(message):
         message_id = message["_id"]
         file_path = ROCKET_QUEUE_FOLDER + message_id

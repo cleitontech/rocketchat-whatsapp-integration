@@ -10,7 +10,7 @@ from src.urls.rocket_chat_urls import *
 from src.visitor_management.visitor_map import *
 from src.constants import *
 from pydub import AudioSegment
-from src.messages_queue import *
+from src.messages_queue.messages_queue import *
 
 app = Flask(__name__,
         static_url_path='/static',
@@ -27,7 +27,7 @@ def msg_snd():
         # extract the payload received via post
         received_message = request.json
 
-        RocketChatMessageQueue.store(message)
+        RocketChatMessageQueue.store(received_message)
 
         # get hold of the messages array inside the payload sent by
         # rocket chat. Tipically this array contains only one message.
