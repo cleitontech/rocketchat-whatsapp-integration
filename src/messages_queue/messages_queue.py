@@ -14,7 +14,7 @@ class ChatApiMessageQueue:
 
     @staticmethod
     def delete(message):
-        message_id = message["id"]
+        message_id = message["id"].replace("@", "-").replace(".", "-")
         file_path = CHAT_API_QUEUE_FOLDER + message_id
         if(os.path.isfile(file_path)):
             try:
@@ -36,7 +36,7 @@ class RocketChatMessageQueue:
 
     @staticmethod
     def delete(message):
-        message_id = message["_id"]
+        message_id = message["_id"].replace("@", "-").replace(".", "-")
         file_path = ROCKET_QUEUE_FOLDER + message_id
         if(os.path.isfile(file_path)):
             try:
