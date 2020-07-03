@@ -19,7 +19,7 @@ To run this project you will need:
 - a server where you can host the project. A free server such as heroku will do the job.
 - a server running [rocket.chat](https://rocket.chat)
 
-Once you have all of the items above, you can edit the constants.py file and add your chat-api
+Once you have all of the items above, you can rename the constants.example.py file to constants.py and add your chat-api
 instance number, rocket chat url etc.
 
 Go to your [chat api dashboard](https://app.chat-api.com/dashboard), and under Instance settings,
