@@ -80,7 +80,7 @@ def msg_recv():
             # Ack zero means that the message was sent.
             # So we ignore anything that is not zero to avoid
             # sending duplicate messages to rocket chat.
-            if "ack" in message and message["ack"] != 0 and message["ack"] != 1:
+            if "ack" in message and message["ack"] != 0:
                 return "ACK MESSAGE"
 
             # register visitor in rocket chat
