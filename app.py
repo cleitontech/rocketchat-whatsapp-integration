@@ -54,7 +54,7 @@ def msg_snd():
 
 
             # send the message to Chat-Api
-            answer = requests.post(url, data=message_dict, headers=headers)
+            answer = requests.post(url, data=json.dumps(message_dict), headers=headers)
             print(answer.text)
     return answer.text
 
