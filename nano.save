@@ -1,0 +1,31 @@
+`
+Dicionário Horário Comercial (chave dia da semana) + horário de começo e horário final
+Dicionário Feriados - dia/mês/ano, e/ou apenas dia/mês - Título
+
+
+mensagem_horário_comercial = O nosso horário de atendimento é de segunda a sexta, das 08:30 às 17:30.
+mensagem_offline = Por favor, deixe uma mensagem com a sua solicitação. Lembre-se de deixar um telefone e email para contato.
+
+(Rotina começa ao receber uma nova mensagem no Omnichat)
+
+
+
+
+Se última_iteração < 30minutos:
+    break
+
+Se feriado:
+    print("Olá, devido ao feriado de "titulo_feriado", estamos com atendimento reduzido."
+    print(mensagem_offline)
+    
+Senão:
+    Se horário_comercial:
+    sleep(120)
+    Se operador_respondeu:
+        break
+    Senão:
+        print("Todos os nossos operadores estão ocupados, por favor, aguarde que em breve vamos ajudar")
+        print(mensagem_offline)
+        
+           
+    `
