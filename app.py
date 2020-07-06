@@ -106,7 +106,6 @@ def msg_recv():
             if "ack" in message and message["ack"] != 0:
                 return "ACK MESSAGE"
 
-            ChatApiMessageQueue.store(message)
 
             # register visitor in rocket chat
             visitor_dict = create_visitor(message)
