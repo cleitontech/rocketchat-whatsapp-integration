@@ -12,7 +12,7 @@ class ChatApiMessageQueue:
 
     @staticmethod
     def delete(message_uuid):
-        file_path = CHAT_API_QUEUE_FOLDER + message_uuid
+        file_path = CHAT_API_QUEUE_FOLDER + str(message_uuid)
         if(os.path.isfile(file_path)):
             try:
                 os.remove(file_path)
@@ -31,7 +31,7 @@ class RocketChatMessageQueue:
 
     @staticmethod
     def delete(message_uuid):
-        file_path = ROCKET_QUEUE_FOLDER + message_uuid
+        file_path = ROCKET_QUEUE_FOLDER + str(message_uuid)
         if(os.path.isfile(file_path)):
             try:
                 os.remove(file_path)
