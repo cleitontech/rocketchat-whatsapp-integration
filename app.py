@@ -1,14 +1,16 @@
 from flask import Flask, request
 import requests
 import os
-import json
 import uuid
 from src.message_factories.chat_api_message_factory import ChatApiMessageFactory
 from src.message_factories.rocket_message_factory import RocketMessageFactory
 from src.urls.chat_api_urls import chat_api_url_factory
 from src.urls.rocket_chat_urls import *
 from src.visitor_management.visitor_map import *
+from src.constants import *
 from pydub import AudioSegment
+from src.messages_queue.messages_queue import *
+import json
 
 app = Flask(__name__,
         static_url_path='/static',
@@ -22,14 +24,20 @@ def msg_snd():
         # possible messages incoming form RocketChat
         messageFactory = ChatApiMessageFactory()
 
-
         # extract the payload received via post
-        received_message = request.json
-
+        if request.args.get("message_uuid"):
+            message_uuid = request.args.get("message_uuid")
+            file_path = ROCKET_QUEUE_FOLDER + message_uuid
+            file_temp = open(file_path, "r").read()
+            received_message = json.loads(file_temp)
+        else:
+            received_message = request.json
+            message_uuid = str(uuid.uuid4())
+            RocketChatMessageQueue.store(received_message, message_uuid)
+        if not received_message:
+            return "NO MESSAGE"
 
         # get hold of the messages array inside the payload sent by
-        # rocket chat. Tipically this array contains only one message.
-        # I don't know why...
         messages = received_message["messages"]
 
         # Extract the message destination from the object. It is in the
@@ -52,9 +60,11 @@ def msg_snd():
             else:
                 headers = {"Content-type": "application/json"}
 
-
             # send the message to Chat-Api
-            answer = requests.post(url, data=json.dumps(message_dict), headers=headers)
+            message_json = json.dumps(message_dict)
+            answer = requests.post(url, data=message_json, headers=headers)
+            if answer.status_code == 200:
+                RocketChatMessageQueue.delete(message_uuid)
     return answer.text
 
 
@@ -63,14 +73,28 @@ def msg_snd():
 def msg_recv():
     # only proceed if the request type is POST
     if request.method == 'POST':
+
+        # extract the payload received via post
+        if request.args.get("message_uuid"):
+            message_uuid = request.args.get("message_uuid")
+            file_path = CHAT_API_QUEUE_FOLDER + message_uuid
+            file_temp = open(file_path, "r").read()
+            received_message = json.loads(file_temp)
+        else:
+            received_message = request.json
+            message_uuid = str(uuid.uuid4())
+            ChatApiMessageQueue.store(received_message, message_uuid)
+        if not received_message:
+            return "NO MESSAGE"
+
         # If there is no message member inside the json,
         # ignore the request. Because it is probably a ACK
         # message.
-        if not "messages" in request.json:
+        if not "messages" in received_message:
             return "ACK MESSAGE"
 
         # Get hold of the messages array
-        messages = request.json["messages"]
+        messages = received_message["messages"]
 
         # for every message in the object, forward to Rocket.chat
         # tipically this is a size 1 array.
@@ -81,6 +105,8 @@ def msg_recv():
             # sending duplicate messages to rocket chat.
             if "ack" in message and message["ack"] != 0:
                 return "ACK MESSAGE"
+
+            ChatApiMessageQueue.store(message)
 
             # register visitor in rocket chat
             visitor_dict = create_visitor(message)
@@ -112,15 +138,18 @@ def msg_recv():
             response = requests.post(url=get_rocket_message_url(
             ), data=json.dumps(converted_message), headers=headers)
 
+            if response.status_code == 200:
+                ChatApiMessageQueue.delete(message)
 
     return(response.text)
 
 
 if __name__ == "__main__":
-    file_folders = ["static", "temp"]
+    file_folders = ["static", "temp", CHAT_API_QUEUE_FOLDER, ROCKET_QUEUE_FOLDER]
     for folder_name in file_folders:
         if not os.path.isdir(os.path.join(os.getcwd(), folder_name)):
             os.makedirs(os.path.join(os.getcwd(), folder_name))
 
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
