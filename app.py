@@ -90,7 +90,7 @@ def msg_recv():
         # If there is no message member inside the json,
         # ignore the request. Because it is probably a ACK
         # message.
-        if not "messages" in received_message
+        if not "messages" in received_message:
             return "ACK MESSAGE"
 
         # Get hold of the messages array
