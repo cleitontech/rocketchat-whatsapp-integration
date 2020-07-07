@@ -37,6 +37,14 @@ def msg_snd():
         if not received_message:
             return "NO MESSAGE"
 
+        phone_pattern = re.compile("[0-9]{12}-c.us")
+        token = received_message["visitor"]["token"]
+        match_result = phone_pattern.match(token)
+        if not match_result:
+            print("Visitor token was not a chat-api id.")
+            return "Visitor token was not a chat-api id."
+
+
         # get hold of the messages array inside the payload sent by
         messages = received_message["messages"]
 
