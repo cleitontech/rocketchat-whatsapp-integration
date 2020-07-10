@@ -23,14 +23,21 @@ Once you have all of the items above, you can rename the constants.example.py fi
 instance number, rocket chat url etc.
 
 Go to your [chat api dashboard](https://app.chat-api.com/dashboard), and under Instance settings,
-configure the webhook to ```https://your-domain-name.com/msg_recv```. This is the endpoint that 
+configure the webhook to ```https://your-domain-name.com/webhook/chatapi?token=your-secret-webhook-token```. This is the endpoint that 
 awaits for a post message from chat-api, and forwards it to rocket.chat.
 
 Now every message sent to your chat-api whatsapp number should be
 forwarded to your rocket.chat live-messages. But the messages sent from rocket-chat will not 
 reach your whatsapp number. To solve this, you need to configure rocket.chat's live message
 webhooks found under omnichannel > webhooks > send request for agent's messages. 
-Your webhook url should look like ```https://your-domain-name.com/msg_snd```.
+Your webhook url should look like ```https://your-domain-name.com/webhook/rocket_chat```.
+Make sure to enable rocketchat's webhook secret token. Rocket chat sends this token as a header called ```X-Rocketchat-Livechat-Token```. 
+
+## About messages being lost...
+This service relies on both RocketChat's and Chat-Api's webhooks. If your server goes down during the exchange of messages between a WhatsApp client and a RocketChat agent, the message would be lost. If RocketChat's webhook fails to deliver, it retries for ten times every ten minutes. **ChatApi's webhook only tries once,** and if it fails, it completely gives up on delivering that message via webhook. For this reason, a routine was added to store every message's id from ChatApi, until we're sure it was delivered. The routine also periodically requests ChatApi for a list of messages exchanged since the timestamp stored in the ```timestamp.lock``` file (this timestamp is updated every time this routine runs). Finally, if losing messages worries you, I would suggest scheduling a crontab job, that runs the ```queue.sh``` script periodically.
+
+## About media messages expiry 
+Media messages sent from WhatsApp are stored in a FireStorage server by ChatApi. These files are kept for 30 days, and then deleted. To circumvent this, media messages are being stored locally by this service and kept for as long as needed.
 
 ## TODO:
 - [x] Send text messages from WhatApp to Rocket.Chat
