@@ -16,21 +16,22 @@ import json
 import time
 
 app = Flask(__name__,
-        static_url_path='/static',
-        static_folder='static',
-        )
+            static_url_path='/static',
+            static_folder='static',
+            )
+
 
 @app.route("/chatapi/from-timestamp", methods=["GET"])
 def get_all_messages_since():
     min_time = str(open("timestamp.lock", "r").read())
     timestamp_test = datetime.fromtimestamp(int(min_time))
 
-    endpoint="https://api.chat-api.com/instance{}/messages?token={}&min_time={}".format(INSTANCE_ID, CHAT_API_TOKEN, min_time)
+    endpoint = "https://api.chat-api.com/instance{}/messages?token={}&min_time={}".format( INSTANCE_ID, CHAT_API_TOKEN, min_time)
+
     response = requests.get(url=endpoint)
     response = json.loads(response.text)
     messages = response["messages"]
     from_chat_api = [message for message in messages if message["ack"] == 0]
-
 
     for message in from_chat_api:
         try:
@@ -75,7 +76,6 @@ def webhook_rocketchat():
         if not received_message:
             return "NO MESSAGE"
 
-
         phone_pattern = re.compile("[0-9]{8,20}-c.us")
         token = received_message["visitor"]["token"]
         match_result = phone_pattern.match(token)
@@ -86,7 +86,8 @@ def webhook_rocketchat():
         messages = received_message["messages"]
         # Extract the message destination from the object. It is in the
         # format 5551998121654-c.us
-        message_destination = received_message["visitor"]["token"].split("-")[0]
+        message_destination = received_message["visitor"]["token"].split(
+            "-")[0]
 
         # iterate through the messages array. Again, tipically this array
         # only contains one message... so a single iteration...
@@ -95,7 +96,7 @@ def webhook_rocketchat():
             for blacklisted in ROCKETCHAT_MESSAGE_BLACKLIST:
                 if blacklisted in message["msg"]:
                     message_blacklisted = True
-                    
+
             if not message_blacklisted:
                 # Use our message factory to create a message payload accordingly.
                 message_dict = messageFactory.create_message(
@@ -106,7 +107,8 @@ def webhook_rocketchat():
 
                 # Create the header to send along with our request
                 if "sendPtt" in url:
-                    headers = {'accept': 'application/json', "Content-type": "application/x-www-form-urlencoded"}
+                    headers = {'accept': 'application/json',
+                               "Content-type": "application/x-www-form-urlencoded"}
                 else:
                     headers = {"Content-type": "application/json"}
 
@@ -116,11 +118,11 @@ def webhook_rocketchat():
                 if answer.status_code == 200:
                     RocketChatMessageQueue.delete(message_uuid)
 
-                open("messages_received_chat_api/{}".format(json.loads(answer.text)["id"]), "w").write(json.loads(answer.text)["id"])
+                open("messages_received_chat_api/{}".format(json.loads(answer.text) ["id"]), "w").write(json.loads(answer.text)["id"])
 
             else:
-                answer = "Message blacklisted"
-            
+                answer = {"text": "Message blacklisted"}
+
     return answer.text
 
 
@@ -143,7 +145,7 @@ def webhook_chatapi():
             received_message = request.json
             message_uuid = str(uuid.uuid4())
             ChatApiMessageQueue.store(received_message, message_uuid)
-             
+
         if not received_message:
             return "NO MESSAGE"
 
@@ -156,8 +158,6 @@ def webhook_chatapi():
         # Get hold of the messages array
         messages = received_message["messages"]
 
-        
-
         # for every message in the object, forward to Rocket.chat
         # tipically this is a size 1 array.
         for message in messages:
@@ -165,7 +165,7 @@ def webhook_chatapi():
             # Ack zero means that the message was sent.
             # So we ignore anything that is not zero to avoid
             # sending duplicate messages to rocket chat.
-            if "ack" in message and message["ack"] != 0 :
+            if "ack" in message and message["ack"] != 0:
                 return "ACK MESSAGE"
 
             if message["id"][:4] == "true":
@@ -194,7 +194,7 @@ def webhook_chatapi():
             room = json.loads(room.text)["room"]
 
             # If the last room the visitor interacted with was closed, update
-            # the file with the new rid, so that the next message will be 
+            # the file with the new rid, so that the next message will be
             # forwarded correctly.
             update_visitor_rid_file(visitor_token, room, rid)
 
@@ -212,12 +212,12 @@ def webhook_chatapi():
             if response.status_code == 200:
                 ChatApiMessageQueue.delete(message_uuid)
 
-
     return(response.text)
 
 
 if __name__ == "__main__":
-    file_folders = ["static", "/static/media_upload", "temp", CHAT_API_IDS, CHAT_API_QUEUE_FOLDER, ROCKET_QUEUE_FOLDER]
+    file_folders = ["static", "/static/media_upload", "temp",
+                    CHAT_API_IDS, CHAT_API_QUEUE_FOLDER, ROCKET_QUEUE_FOLDER]
     for folder_name in file_folders:
         if not os.path.isdir(os.path.join(os.getcwd(), folder_name)):
             os.makedirs(os.path.join(os.getcwd(), folder_name))
@@ -231,7 +231,6 @@ if __name__ == "__main__":
         last_message_timestamp = str(int(time.time()))
         timestamp_file.write(last_message_timestamp)
         timestamp_file.close()
-    
+
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
-
