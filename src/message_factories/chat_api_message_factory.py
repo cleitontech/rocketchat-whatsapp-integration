@@ -57,8 +57,10 @@ class ChatApiMessageFactory:
             message = ChatApiMediaMessage(public_path, description, destination, file_name, file_type)
             message_dict = message.build()
         else:
-            message_content = "*[{}]*\n{}".format(incoming_message["username"], incoming_message["msg"])
+            sender_name = incoming_message["u"]["name"] if "name" in incoming_message["u"] else incoming_message["u"]["username"]
+            message_content = "*[{}]*\n{}".format(sender_name, incoming_message["msg"])
             message = ChatApiTextMessage(message_content, destination)
             message_dict = message.build()
         return message_dict
+
 
