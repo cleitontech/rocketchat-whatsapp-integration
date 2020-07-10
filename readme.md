@@ -19,7 +19,7 @@ To run this project you will need:
 - a server where you can host the project. A free server such as heroku will do the job.
 - a server running [rocket.chat](https://rocket.chat)
 
-Once you have all of the items above, you can edit the constants.py file and add your chat-api
+Once you have all of the items above, you can rename the constants.example.py file to constants.py and add your chat-api
 instance number, rocket chat url etc.
 
 Go to your [chat api dashboard](https://app.chat-api.com/dashboard), and under Instance settings,
@@ -35,9 +35,14 @@ Your webhook url should look like ```https://your-domain-name.com/msg_snd```.
 ## TODO:
 - [x] Send text messages from WhatApp to Rocket.Chat
 - [x] Send text messages from Rocket.chat to WhatsApp
-- [x] Send media messages from Rocket.chat to WhatApp (currently only images)
-- [x] Send media messages from WhatsApp to Rocket.Chat (media currently goes as links)
+- [x] Send media messages from Rocket.chat to WhatApp
+  - [x] images
+  - [x] audio
+  - [x] documents
+- [ ] Send media messages from WhatsApp to Rocket.Chat
+  - [x] send media as links
+  - [ ] send images as attachments
 - [ ] Integrate with other APIs. (e.g., [Wassenger](https://www.wassenger.com/))
 
 ## Want to contribute?
-Feel free to open a pull request with a bug fix or a feature you think is interesting.
+Feel free to open a pull request with a bug fix or a feature you think is interesting. 

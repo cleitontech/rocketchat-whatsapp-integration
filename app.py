@@ -82,6 +82,7 @@ def webhook_rocketchat():
         if not match_result:
             return "Visitor token was not a chat-api id."
 
+
         # get hold of the messages array inside the payload sent by
         messages = received_message["messages"]
         # Extract the message destination from the object. It is in the
@@ -175,6 +176,7 @@ def webhook_chatapi():
             message_id_file = open(CHAT_API_IDS + message_id, "w")
             message_id_file.write(message_id)
             message_id_file.close()
+
 
             # register visitor in rocket chat
             visitor_dict = create_visitor(message)
