@@ -3,11 +3,22 @@ from src.constants import *
 def create_visitor(message):
     return {
         "visitor":{
-            "name": message["senderName"],
+            "name": message["chatName"],
             "email": "",
             "token": message["chatId"].replace('@', '-'),
             "department": "",
-            "customFields": [],
+            "customFields": [
+                {
+                    "key": "whatsapp_name",
+                    "value": message["senderName"],
+                    "overwrite": False,
+                },
+                {
+                    "key": "whatsapp_number",
+                    "value": message["chatName"],
+                    "overwrite": False,
+                }
+            ]
         }
     }
 
@@ -24,4 +35,5 @@ def get_room_url(visitor_token, chat_id):
 
 def get_rocket_message_url():
     return "{}{}".format(ROCKET_URL_PREFIX, ROCKET_MESSAGE_URL_POSTFIX)
+
 
