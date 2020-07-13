@@ -1,0 +1,24 @@
+version: '3'
+services:
+    web:
+        build: .
+        ports:
+            - "5000:5000"
+        volumes:
+            - .:/app
+            - messages_queue:/store/messages_queue
+            - messages_received_chat_api:/store/messages_received_chat_api
+            - media_upload:/store/media_upload
+        environment:
+            - FLASK_ENV=development
+            - FLASK_APP=app.py
+            - domain_name=w.unimedtv.coop.br
+            - MEDIA_UPLOAD_URL=https://w.unimedtv.coop.br/static/media_upload/
+            - MEDIA_UPLOAD_PATH=/store/media_upload
+        command:
+            flask run --host=0.0.0.0
+
+volumes:
+    messages_queue: {}
+    messages_received_chat_api: {}
+    media_upload: {}
