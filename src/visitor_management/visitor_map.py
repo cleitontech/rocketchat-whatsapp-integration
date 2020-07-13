@@ -21,7 +21,11 @@ def create_visitor_rid_file(visitor):
         return rid
 
 def update_visitor_rid_file(visitor_token, room, rid):
-    if room["_id"] != rid:
-        visitor_file = open("visitor_map/{}".format(visitor_token), "w")
-        visitor_file.write(room["_id"])
-        visitor_file.close()
+    try:
+        if room["_id"] != rid:
+            visitor_file = open("visitor_map/{}".format(visitor_token), "w")
+            visitor_file.write(room["_id"])
+            visitor_file.close()
+    except KeyError:
+        # when no agents available, it doesnt generate a room id
+        pass

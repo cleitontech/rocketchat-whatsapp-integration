@@ -1,3 +1,7 @@
 src/constants.py
 *.lock
 *.pyc
+messages_queue/*
+messages_received*
+.env
+visitor_map/*

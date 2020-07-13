@@ -10,6 +10,7 @@ from src.urls.chat_api_urls import chat_api_url_factory
 from src.urls.rocket_chat_urls import *
 from src.visitor_management.visitor_map import *
 from src.constants import *
+from src.constants import domain_name
 from pydub import AudioSegment
 from src.messages_queue.messages_queue import *
 import json
@@ -60,6 +61,7 @@ def webhook_rocketchat():
     if request.method == 'POST':
         if request.headers["X-Rocketchat-Livechat-Token"] != ROCKETC_WEBHOOK_TOKEN:
             return "Invalid secret token"
+
         # Create a new message factory to handle different types of
         # possible messages incoming form RocketChat
         messageFactory = ChatApiMessageFactory()
@@ -119,8 +121,11 @@ def webhook_rocketchat():
                 if answer.status_code == 200:
                     RocketChatMessageQueue.delete(message_uuid)
 
-                open("messages_received_chat_api/{}".format(json.loads(answer.text)
-                                                            ["id"]), "w").write(json.loads(answer.text)["id"])
+                f = open("{0}/{1}".format(
+                    CHAT_API_IDS,
+                    json.loads(answer.text)["id"]
+                ), "w")
+                f.write(json.loads(answer.text)["id"])
 
             else:
                 answer = {"text": "Message blacklisted"}
@@ -182,7 +187,6 @@ def webhook_chatapi():
             visitor_dict = create_visitor(message)
             register_visitor_request = requests.post(
                 url=get_visitor_url(), data=json.dumps(visitor_dict))
-
             try:
                 visitor = json.loads(register_visitor_request.text)
                 visitor_token = visitor["visitor"]["token"]
@@ -193,7 +197,30 @@ def webhook_chatapi():
             # The file should contain his last rocket chat livechat room id.
             rid = create_visitor_rid_file(visitor)
             room = requests.get(url=get_room_url(visitor_token, rid))
-            room = json.loads(room.text)["room"]
+            room = json.loads(room.text)
+            if room["success"]:
+                room = room["room"]
+            else:
+                # error while creating the room
+                # should decide if gets back to client or what
+                if room["error"] == "no-agent-online":
+                    messageFactory = ChatApiMessageFactory()
+                    message_destination = visitor_token.split("-")[0]
+                    message = {
+                        'u': {
+                            "name": NO_AGENT_NAME,
+                        },
+                        "msg": NO_AGENT_MESSAGE
+                    }
+                    message_dict = messageFactory.create_message(
+                        message, message_destination)
+                    message_json = json.dumps(message_dict)
+                    url = chat_api_url_factory(message)
+                    headers = {"Content-type": "application/json"}
+                    requests.post(url, data=message_json, headers=headers)
+                    return("ok")
+                    # register the offline livechat form?
+                    # https://docs.rocket.chat/api/rest-api/methods/livechat/message#send-a-new-livechat-offline-message
 
             # If the last room the visitor interacted with was closed, update
             # the file with the new rid, so that the next message will be
@@ -216,7 +243,14 @@ def webhook_chatapi():
 
     return(response.text)
 
-if __name__ == "__main__":
+
+def startup():
+    app.logger.info("#####")
+    app.logger.info("ROCKETCHAT WHATSAPP INTEGRATION")
+    app.logger.info("#####")
+    app.logger.info("DEBUG {0}".format(app.config['DEBUG']))
+    app.logger.info("DOMAIN {0}".format(domain_name))
+    app.logger.info("ROCKET_URL_PREFIX {0}".format(ROCKET_URL_PREFIX))
     file_folders = ["static", "/static/media_upload", "temp",
                     CHAT_API_IDS, CHAT_API_QUEUE_FOLDER, ROCKET_QUEUE_FOLDER]
     for folder_name in file_folders:
@@ -224,11 +258,11 @@ if __name__ == "__main__":
             try:
                 os.makedirs(os.path.join(os.getcwd(), folder_name))
             except PermissionError:
-                print("no permission to create ", os.path.join(os.getcwd(), folder_name))
-
+                print("no permission to create ",
+                      os.path.join(os.getcwd(), folder_name))
 
     get_messages_timestamp = "timestamp.lock"
-    
+
     try:
         last_message_timestamp = int(open(get_messages_timestamp, "r").read())
         timestamp_test = datetime.fromtimestamp(last_message_timestamp)
@@ -238,6 +272,10 @@ if __name__ == "__main__":
         timestamp_file.write(last_message_timestamp)
         timestamp_file.close()
 
+
+app.before_first_request(startup)
+
+if __name__ == "__main__":
 
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
