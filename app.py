@@ -26,7 +26,8 @@ def get_all_messages_since():
     min_time = str(open("timestamp.lock", "r").read())
     timestamp_test = datetime.fromtimestamp(int(min_time))
 
-    endpoint = "https://api.chat-api.com/instance{}/messages?token={}&min_time={}".format( INSTANCE_ID, CHAT_API_TOKEN, min_time)
+    endpoint = "https://api.chat-api.com/instance{}/messages?token={}&min_time={}".format(
+        INSTANCE_ID, CHAT_API_TOKEN, min_time)
 
     response = requests.get(url=endpoint)
     response = json.loads(response.text)
@@ -82,7 +83,6 @@ def webhook_rocketchat():
         if not match_result:
             return "Visitor token was not a chat-api id."
 
-
         # get hold of the messages array inside the payload sent by
         messages = received_message["messages"]
         # Extract the message destination from the object. It is in the
@@ -119,7 +119,8 @@ def webhook_rocketchat():
                 if answer.status_code == 200:
                     RocketChatMessageQueue.delete(message_uuid)
 
-                open("messages_received_chat_api/{}".format(json.loads(answer.text) ["id"]), "w").write(json.loads(answer.text)["id"])
+                open("messages_received_chat_api/{}".format(json.loads(answer.text)
+                                                            ["id"]), "w").write(json.loads(answer.text)["id"])
 
             else:
                 answer = {"text": "Message blacklisted"}
@@ -177,7 +178,6 @@ def webhook_chatapi():
             message_id_file.write(message_id)
             message_id_file.close()
 
-
             # register visitor in rocket chat
             visitor_dict = create_visitor(message)
             register_visitor_request = requests.post(
@@ -216,15 +216,19 @@ def webhook_chatapi():
 
     return(response.text)
 
-
 if __name__ == "__main__":
     file_folders = ["static", "/static/media_upload", "temp",
                     CHAT_API_IDS, CHAT_API_QUEUE_FOLDER, ROCKET_QUEUE_FOLDER]
     for folder_name in file_folders:
         if not os.path.isdir(os.path.join(os.getcwd(), folder_name)):
-            os.makedirs(os.path.join(os.getcwd(), folder_name))
+            try:
+                os.makedirs(os.path.join(os.getcwd(), folder_name))
+            except PermissionError:
+                print("no permission to create ", os.path.join(os.getcwd(), folder_name))
+
 
     get_messages_timestamp = "timestamp.lock"
+    
     try:
         last_message_timestamp = int(open(get_messages_timestamp, "r").read())
         timestamp_test = datetime.fromtimestamp(last_message_timestamp)
@@ -233,6 +237,7 @@ if __name__ == "__main__":
         last_message_timestamp = str(int(time.time()))
         timestamp_file.write(last_message_timestamp)
         timestamp_file.close()
+
 
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
